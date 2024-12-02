@@ -1,7 +1,6 @@
 package day_01
 
 import (
-	"fmt"
 	"os"
 	"slices"
 	"strconv"
@@ -10,15 +9,16 @@ import (
 	"github.com/mnezh/advent-of-code/2024/util"
 )
 
-func Do() {
-	fmt.Println(Calc("day_01/input"))
-}
-
-func Calc(filePath string) int {
-	return distance(readInput(util.DataPath(filePath)))
+func Day1(part int) int {
+	if part == 1 {
+		return Calc("day_01/input", distance)
+	}
+	return Calc("day_01/input", similarityScore)
 }
 
 func distance(left, right []int) int {
+	slices.Sort(left)
+	slices.Sort(right)
 	sum := 0
 	for index, l := range left {
 		diff := l - right[index]
@@ -28,6 +28,24 @@ func distance(left, right []int) int {
 		sum = sum + diff
 	}
 	return sum
+}
+
+func similarityScore(left, right []int) int {
+	score := 0
+	for _, l := range left {
+		score += l * occurrences(right, l)
+	}
+	return score
+}
+
+func occurrences(list []int, lookingFor int) int {
+	res := 0
+	for _, item := range list {
+		if item == lookingFor {
+			res++
+		}
+	}
+	return res
 }
 
 func readInput(filePath string) ([]int, []int) {
@@ -45,7 +63,10 @@ func readInput(filePath string) ([]int, []int) {
 			right = append(right, r)
 		}
 	}
-	slices.Sort(left)
-	slices.Sort(right)
+
 	return left, right
+}
+
+func Calc(filePath string, calculator func([]int, []int) int) int {
+	return calculator(readInput(util.DataPath(filePath)))
 }
